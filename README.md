@@ -2,16 +2,32 @@
 
 ## Pipe Up
 
-One sentence description
+The `pipe` program runs a series of shell commands as a pipeline where the stdout of one command is sequentially fed to the stdin of the next.
 
 ## Building
 
-Explain briefly how to build your program
+From this directory, run
+
+```bash
+make
+```
 
 ## Running
 
-Show an example run of your program, using at least two additional arguments, and what to expect
+Example:
+
+```bash
+./pipe ls cat wc
+```
+
+The program should output (just as `ls | cat | wc` would) a line of three numbers from `wc` (line/word/byte counts of `ls`’s output).
 
 ## Cleaning up
 
-Explain briefly how to clean up all binary files
+Remove the build with
+
+```bash
+make clean
+```
+
+That deletes `pipe` and `pipe.o`.
