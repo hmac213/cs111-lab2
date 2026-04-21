@@ -13,6 +13,8 @@ int main(int argc, char *argv[])
 	}
 
 	int prev_read_fd = -1;
+	int ncmds = argc - 1;
+	pid_t pids[argc - 1];
 
 	for (int i = 1; i < argc; i++) {
 		int is_last = (i == argc - 1);
@@ -65,19 +67,23 @@ int main(int argc, char *argv[])
 			close(newpipe[1]);
 			prev_read_fd = newpipe[0];
 		}
+
+		pids[i - 1] = pid;
 	}
 
 	int exit_code = 0;
 
-	for (int i = 1; i < argc; i++) {
+	for (int j = 0; j < ncmds; j++) {
 		int status;
 
-		if (wait(&status) == -1)
+		if (waitpid(pids[j], &status, 0) == -1)
 			exit(errno);
-		if (WIFEXITED(status))
-			exit_code = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status))
-			exit_code = 128 + WTERMSIG(status);
+		if (j == ncmds - 1) {
+			if (WIFEXITED(status))
+				exit_code = WEXITSTATUS(status);
+			else if (WIFSIGNALED(status))
+				exit_code = 128 + WTERMSIG(status);
+		}
 	}
 
 	return exit_code;
