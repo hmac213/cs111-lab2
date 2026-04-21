@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
 				close(newpipe[1]);
 			}
 			execlp(argv[i], argv[i], (char *)NULL);
-			errno = EINVAL;
+			perror(argv[i]);
 			_exit(EINVAL);
 		}
 
@@ -66,10 +67,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	int exit_code = 0;
+
 	for (int i = 1; i < argc; i++) {
-		if (wait(NULL) == -1)
+		int status;
+
+		if (wait(&status) == -1)
 			exit(errno);
+		if (WIFEXITED(status))
+			exit_code = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			exit_code = 128 + WTERMSIG(status);
 	}
 
-	return 0;
+	return exit_code;
 }
